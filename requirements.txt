@@ -1,0 +1,6 @@
+requirements.txt
+--extra-index-url https://packages.ard.maxar.com/
+max_ard
+rasterio
+shapely
+matplotlib
