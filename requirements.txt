@@ -3,3 +3,4 @@ max_ard
 rasterio
 shapely
 matplotlib
+fiona
