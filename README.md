@@ -1,4 +1,6 @@
 # ard-demo-notebooks
 Demo ARD notebooks for running in Binder
 
-https://mybinder.org/v2/gh/maxar-analytics/ard-demo-notebooks/ce20a45017e2518557fd06515c7c8c51089945db
+Current Binder URL (built from `edit-data-access-new` branch):
+
+https://mybinder.org/v2/gh/maxar-analytics/ard-demo-notebooks/75313a9893e68d1776dbab026b34809d4b19e8b0
