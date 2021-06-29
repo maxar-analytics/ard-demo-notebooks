@@ -1,5 +1,5 @@
-max_ard
-git+git:https://github.com/maxar-analytics/max-ard/releases/tag/1.0.0-alpha.0#egg=max_ard
+max-ard
+git+git:https://github.com/maxar-analytics/max-ard/releases/tag/1.0.0-alpha.0#egg=max-ard
 rasterio
 shapely
 matplotlib
