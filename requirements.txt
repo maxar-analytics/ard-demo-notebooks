@@ -1,5 +1,5 @@
 --extra-index-url https://packages.ard.maxar.com/
-max_ard=1.0.0a2
+max_ard==1.0.0a2
 rasterio
 shapely
 matplotlib
