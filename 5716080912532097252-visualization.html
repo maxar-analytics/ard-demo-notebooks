@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Visualization: 5716080912532097252</title>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <!-- mapboxgl -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js"></script>
+    <!-- wicket for wkt manipulation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wicket/1.3.6/wicket.min.js"></script>
+    <!-- bootstrap + dependencies -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <!-- mapboxgl css -->
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <!-- bootstrap css -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+      .mapboxgl-popup-anchor-bottom {
+        max-width: unset !important;
+      }
+      .thumbnail-container {
+        display: flex;
+        flex-direction: column;
+      }
+      #sidebar {
+        height: 100%; /* Full-height: remove this if you want "auto" height */
+        width: 0px;
+        position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+        z-index: 1; /* Stay on top */
+        top: 0; /* Stay at the top */
+        left: 0;
+        background-color: #343a40; /* twitter dark */
+        overflow-x: hidden; /* Disable horizontal scroll */
+        padding: 5px 5px;
+      }
+      #sidebar.active {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 400px; /* Set the width of the sidebar */
+        padding-top: 30px;
+      }
+
+      #sidebar.inactive {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 25px; /* Set the width of the sidebar */
+        padding-top: 30px;
+      }
+
+      #sidebar.active img {
+        position: absolute;
+      }
+
+      #sidebar-content.hidden {
+          visibility: hidden;
+          overflow: hidden;
+      }
+
+      #sidebar .closebtn {
+        text-decoration: none;
+        color: #d7dada;
+        display: block;
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        font-size: 20px;
+        font-weight: bold;
+        padding-top: 0px;
+        margin-top: 0px;
+      }
+
+      .image-container {
+        margin-top: 3px;
+        width: 315px;
+        height: 315px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .tile-image {
+        width: 315px;
+        height: 315px;
+      }
+
+      #total-usage {
+        width: 95%;
+        margin: 10px;
+        background-color:#c6c8ca;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      #usage {
+        color: black;
+      }
+      #legend-container {
+        position: absolute;
+        display: flex;
+        justify-content: flex-end;
+        z-index: 900;
+        bottom: 70px;
+        right: 15px;
+        left: calc(100vw - 200px);
+      }
+      .legend {
+        height: 25px;
+        border-radius: 5px;
+        background-image: linear-gradient(to right, rgb(12, 123, 220), rgb(255, 194, 10));
+      }
+      .legend-body {
+        height: 75px;
+        background-color:#c6c8ca;
+        width: 165px;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      .legend-body-short {
+        height: 50px;
+        background-color:#c6c8ca;
+        width: 165px;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      /*
+      #request-summary-container {
+        position: absolute;
+        z-index: 1000;
+        top: 15px;
+        left: 15px;
+        width: 350px;
+        font-size: medium;
+        background-color: #cfd9e3;
+        border-radius: 5px;
+      }
+      */
+      #request-summary-container {
+        position: absolute;
+        z-index:1000;
+        top: 15px;
+        left: calc(100vw - 410px);
+        right: 0;
+        width: 400px;
+        background-color: #cfd9e3;
+        border-radius: 5px;
+        font-size: medium;
+      }
+      #request-details {
+        margin: 10px;
+        border-radius: 5px;
+        max-height: 90vh;
+        overflow: auto;
+      }
+      summary {
+        font-weight: bold;
+        border-radius: 5px;
+        padding: 5px;
+      }
+      details.ul {
+        padding-inline-start: 0px;
+      }
+      .acq-row {
+          padding: 2px;
+      }
+      .row-odd {
+          background-color: #ecf1f2;
+      }
+      .row-even {
+          background-color: #d7dedf;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="sidebar">
+    </div>
+    <div id="map">
+      <div id="request-summary-container">
+      </div>
+      <div id="legend-container">
+      </div>
+    </div>
+    <script>
+      mapboxgl.accessToken = "pk.eyJ1Ijoib2dvcG9nby1hbmFseXRpY3MiLCJhIjoiY2tob3ZwMjl0MDR5ZzJybzIwdzBva2UzdyJ9.Lset5ltHu9owcPQAMs86Sw"
+      var center = [-118.32921420035063, 34.176277823974644]
+
+      var map = new mapboxgl.Map({
+        container: "map", // container id
+        style: "mapbox://styles/mapbox/dark-v9", // style URL
+        center: [-118.32921420035063, 34.176277823974644], // starting position [lng, lat]
+        zoom: 9, // starting zoom
+      });
+
+      // Create a new Wicket instance
+      var wkt = new Wkt.Wkt();
+
+      // Every material selection min max is different. we need to calc. intervals so we have sensible shading for all types of
+      // available_tile thresholds.
+
+      function minMaxIntervals(min, max){
+        var arr = [];
+        arr.push(min);
+        arr.push(min + (max - min) / 3);
+        arr.push(min + (2 * (max - min)) / 3);
+        arr.push(max);
+        return arr
+      };
+
+      function findMinMax(geojson){
+
+        var available_tiles_arr = []
+        geojson.features.map(feature => {
+          available_tiles_arr.push(feature.properties.available_tiles)
+        })
+
+        // we don't want a value of 0 to skew our values since those tiles won't get colored anyway
+        filtered_arr = available_tiles_arr.filter(elem => elem > 0);
+        if(filtered_arr.length === 0){ // ensure array won't be empty
+          filtered_arr.push(1);
+        }
+
+        var min = Math.min(...filtered_arr)
+        var max = Math.max(...filtered_arr)
+
+        // this will avoid breaking mapbox paint style where each step needs to be different number.
+        if ( min === max ) {
+          max++
+        }
+        return [min, max]
+
+      }
+
+      function createLegend(el, requested_stack_depth){
+        console.log("req stack depth:")
+        console.log(requested_stack_depth)
+        if (requested_stack_depth){
+          el.innerHTML = `
+          <div class="legend-body">
+            <div class="d-flex w-100 justify-content-between align-items-center">
+              <div style="background-color: rgb(12, 123, 220); height:15px; width:15px;"></div>
+              <small style="font-weight: 600">stack depth not fulfilled</small> 
+            </div>
+            <div class="d-flex w-100 justify-content-between align-items-center">
+              <div style="background-color:#a3a3a3; height:15px; width:15px;"></div>
+              <small style="font-weight: 600">no available tiles</small> 
+            </div>
+            <div class="d-flex w-100 justify-content-between align-items-center">
+              <div style="background-color: rgb(255, 194, 10); height:15px; width:15px;"></div>
+              <small style="font-weight: 600">stack depth fulfilled</small> 
+            </div>
+          </div>
+          `
+        } else {
+          el.innerHTML = `
+          <div class="legend-body-short">
+            <div class="d-flex w-100 justify-content-between align-items-center">
+              <div style="background-color: rgb(255, 194, 10); height:15px; width:15px;"></div>
+              <small style="font-weight: 600">stack depth fulfilled</small> 
+            </div>
+            <div class="d-flex w-100 justify-content-between align-items-center">
+              <div style="background-color:#a3a3a3; height:15px; width:15px;"></div>
+              <small style="font-weight: 600">no available tiles</small> 
+            </div>
+          </div>
+          `
+        }
+      }
+
+      function createRequestSummary(requestEl, criteria, request_id, requested_stack_depth, usage){
+        let content = ''
+        if ( requested_stack_depth ) {
+          content += `
+              <li class="list-group-item list-group-item-dark">
+                  <small>Requested Stack Depth:</small>
+                  <small>${requested_stack_depth}</small>
+              </li>
+              `
+        }
+
+        for ( criterium in criteria ) {
+          if ( criterium !== "aoi" ) {
+            content += `
+              <li class="list-group-item list-group-item-dark">
+                <div class="d-flex w-100 justify-content-between">
+                  <small>${criterium}:</small>
+                  <small><pre>${JSON.stringify(criteria[criterium], undefined, 2)}</pre></small>
+                </div>
+              </li>
+              `
+          }
+        }
+        requestEl.innerHTML = `
+            <div style="width:100%; margin-bottom: 15px;">
+              <details id="request-details">
+                <summary>
+                    Request details: ${request_id}
+                </summary>
+                  <ul class="list-group">
+                    ${content}
+                  </ul>
+                  ${createProgressBar(usage)}
+              </details>
+            </div>
+        `
+      }
+
+      function createAcqContent(acq) {
+          let content = '';
+          let row_counter = 0;
+          if ( acq ) {
+              var acq_keys = Object.fromEntries(Object.entries(acq).sort());
+              for ( prop in acq_keys ) {
+                  if ( prop != 'wkt' && prop != "tile:cloud_polys") {
+                      row_counter += 1;
+                      row_class = (row_counter & 1) ? "row-odd" : "row-even";
+                      content += `
+                <div class="d-flex justify-content-between acq-row ${row_class}">
+                  <small>${prop}:</small>
+                  <small>${acq[prop]}</small>
+                </div>
+                    `
+                  }
+              }
+          }
+          return content;
+      }
+
+      function createSidebarContent(el, acqs, cell_id){
+        let content = `<a href="javascript:void(0)" id="closebtn" class="closebtn" onclick="toggleSidebar()">&lt;|</a>
+        <div id="sidebar-content">
+        `;
+        // cell_id needs to be here
+        acq_ids = acqs.map(acq => acq.acquisition_id)
+
+        if ( acqs.length> 0 ) 
+        {
+          acqs.forEach( acq => {
+            content += `
+            <ul class="list-group">
+              <li class="list-group-item list-group-item-dark">
+                <div class="image-container">
+                  <img class = "tile-image"
+                    src='https://ard.maxar.com/api/v1/browse/preview/${acq.acquisition_id}/${cell_id}' 
+                  />
+                </div>
+                <details>
+                    <summary>${acq.acquisition_id} (${acq.date})</summary>
+                        ${createAcqContent(acq)}
+                </details>
+              </li>
+            </ul>`
+          })
+        } 
+        else 
+        {
+            content += '<p style="color: white;">( No tiles in this cell )</p>';
+        }
+        content += "</div>"
+        el.innerHTML = content
+      }
+
+      function createProgressBar(usage){
+        if ( usage.available_sqkm === -1 ) {
+         return `
+          <div id="total-usage">
+            <small>Selection would consume <span class="font-weight-bold">${usage.selection_sqkm} sqkm</span> of usage
+              (${usage.fresh_imagery_sqkm} sqkm fresh, ${usage.standard_imagery_sqkm} sqkm standard, ${usage.training_imagery_sqkm} sqkm training).
+               Estimate created <span class="font-weight-bold">${usage.usage_as_of.split("T")[0]}</span></small>
+          </div>
+        `
+        } else {
+          const total_percentage = (( usage.selection_sqkm /usage.available_sqkm ) * 100).toFixed(0)
+          return `
+            <div id="total-usage">
+              <small>Selection would consume <span class="font-weight-bold">${usage.selection_sqkm} sqkm</span> of usage
+                (${usage.fresh_imagery_sqkm} sqkm fresh, ${usage.standard_imagery_sqkm} sqkm standard, ${usage.training_imagery_sqkm} sqkm training).
+                 Estimate created <span class="font-weight-bold">${usage.usage_as_of.split("T")[0]}</span></small>
+              <div class="progress">
+                <div id="usage" class="progress-bar progress-bar-striped bg-info" role="progressbar" style="width: ${total_percentage}%;" aria-valuenow="${total_percentage}" aria-valuemin="0" aria-valuemax="100">${total_percentage}%</div>
+              </div>
+            </div>
+          `
+        }
+      }
+
+      function normalizeAoi(aoi) {
+        if (typeof aoi === "string" && !aoi.startsWith("s3://")) {
+          const wkt = new Wkt.Wkt()
+          const geojson = wkt.read(aoi).toJson()
+          return geojson
+        }
+        return aoi
+      }
+
+      function getCoordinates(coord_array) {
+        var coords = [];
+        if (Array.isArray(coord_array[0])) {
+          coord_array.forEach(function(entry) {
+            var child_coords = getCoordinates(entry);
+            coords.push(...child_coords);
+          });
+        }
+        else {
+          coords.push(coord_array);
+        }
+        return coords;
+      }
+
+      map.on("load", () => {
+
+        // add scale
+        map.addControl(new mapboxgl.ScaleControl(), 'bottom-right');
+
+        const geojson = {"type": "FeatureCollection", "features": [{"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [[[-118.30174754312613, 34.15402881455286], [-118.30244011814737, 34.19911043716477], [-118.35669534520935, 34.19852234246022], [-118.35597394098971, 34.15344170891068], [-118.30174754312613, 34.15402881455286]]]}, "properties": {"cell_id": "Z11-031311102133", "available_tiles": 13, "stack_depth_fulfilled": false, "acquisition_datetime_min": "2019-02-09T18:43:24.166819Z", "acquisition_datetime_max": "2019-12-15T18:58:49.485351Z", "best_matches": [{"off_nadir_min": 27.30975, "view:sun_azimuth": 141.38394333333332, "acquisition_id": "10300100927CAC00", "pan_resolution_max": 0.58589303, "date": "2019-05-28", "datetime": "2019-05-28T19:09:46.201908Z", "constellation": "digitalglobe", "tile:cloud_free_percentage": 100.0, "id": "10300100927CAC00", "pan_resolution_avg": 0.5797977016666667, "pan_resolution_min": 0.575584, "modified": "2021-01-18T20:47:13Z", "view:sun_elevation": 74.624245, "tile:cloud_percentage": 0.0, "multi_resolution_avg": 2.3141605833333334, "multi_resolution_min": 2.2974014, "view:off_nadir": 27.716436166666668, "tile:data_percentage": 100.0, "off_nadir_max": 28.293158, "tile:cloud_polys": null, "platform": "worldview-02", "multi_resolution_max": 2.339092, "eo:cloud_cover": 5.387950306856157, "tile:quadkey": "031311102133", "view:azimuth": 104.37058083333334, "instruments": ["VNIR"], "tile:zone": 11, "wkt": "POLYGON ((-118.3017475431261 34.15402881455286, -118.3559739409897 34.15344170891068, -118.3566953452093 34.19852234246022, -118.3024401181474 34.19911043716477, -118.3017475431261 34.15402881455286))", "tile:no_data_percentage": 0.0, "aoi:data_area_sqkm": 2, "aoi:data_percentage": 100, "aoi:cloud_free_percentage": 100}, {"off_nadir_min": 22.569708, "view:sun_azimuth": 132.60642125, "acquisition_id": "1030010096587B00", "pan_resolution_max": 0.54132587, "date": "2019-07-16", "datetime": "2019-07-16T19:04:59.793122Z", "constellation": "digitalglobe", "tile:cloud_free_percentage": 100.0, "id": "1030010096587B00", "pan_resolution_avg": 0.538063165, "pan_resolution_min": 0.5347881, "modified": "2021-01-18T20:34:22Z", "view:sun_elevation": 72.651960625, "tile:cloud_percentage": 0.0, "multi_resolution_avg": 2.1571296, "multi_resolution_min": 2.1435983, "view:off_nadir": 23.041074125, "tile:data_percentage": 100.0, "off_nadir_max": 23.474552, "tile:cloud_polys": null, "platform": "worldview-02", "multi_resolution_max": 2.1698294, "eo:cloud_cover": 11.180499853583388, "tile:quadkey": "031311102133", "view:azimuth": 88.826371875, "instruments": ["VNIR"], "tile:zone": 11, "wkt": "POLYGON ((-118.3017475431261 34.15402881455286, -118.3559739409897 34.15344170891068, -118.3566953452093 34.19852234246022, -118.3024401181474 34.19911043716477, -118.3017475431261 34.15402881455286))", "tile:no_data_percentage": 0.0, "aoi:data_area_sqkm": 2, "aoi:data_percentage": 100, "aoi:cloud_free_percentage": 100}, {"off_nadir_min": 21.663748, "view:sun_azimuth": 140.27375833333332, "acquisition_id": "103001009169C500", "pan_resolution_max": 0.56457025, "date": "2019-05-12", "datetime": "2019-05-12T18:57:41.177603Z", "constellation": "digitalglobe", "tile:cloud_free_percentage": 100.0, "id": "103001009169C500", "pan_resolution_avg": 0.5431106483333333, "pan_resolution_min": 0.5285131, "modified": "2021-01-18T20:51:18Z", "view:sun_elevation": 70.34296983333333, "tile:cloud_percentage": 0.0, "multi_resolution_avg": 2.1694341666666666, "multi_resolution_min": 2.1105325, "view:off_nadir": 23.615418666666667, "tile:data_percentage": 70.0, "off_nadir_max": 26.27875, "tile:cloud_polys": null, "platform": "worldview-02", "multi_resolution_max": 2.2564194, "eo:cloud_cover": 1.9608687254644164, "tile:quadkey": "031311102133", "view:azimuth": 168.94387, "instruments": ["VNIR"], "tile:zone": 11, "wkt": "POLYGON ((-118.3180924578597 34.15385437199821, -118.3559739409897 34.15344170891068, -118.3566953452093 34.19852234246022, -118.3186849580457 34.19893687007861, -118.318106 34.15519, -118.3180924578597 34.15385437199821))", "tile:no_data_percentage": 30.0, "aoi:data_area_sqkm": 2, "aoi:data_percentage": 100, "aoi:cloud_free_percentage": 100}, {"off_nadir_min": 13.769359, "view:sun_azimuth": 119.09262428571428, "acquisition_id": "1050010017694000", "pan_resolution_max": 0.44697624, "date": "2019-07-14", "datetime": "2019-07-14T18:38:03.884948Z", "constellation": "digitalglobe", "tile:cloud_free_percentage": 100.0, "id": "1050010017694000", "pan_resolution_avg": 0.4372702757142857, "pan_resolution_min": 0.43346456, "modified": "2021-01-18T20:51:05Z", "view:sun_elevation": 68.33425028571429, "tile:cloud_percentage": 0.0, "multi_resolution_avg": 1.7494739428571429, "multi_resolution_min": 1.7342412, "view:off_nadir": 14.833768714285714, "tile:data_percentage": 100.0, "off_nadir_max": 17.412285, "tile:cloud_polys": null, "platform": "geoeye-01", "multi_resolution_max": 1.7883307, "eo:cloud_cover": 19.260139121302515, "tile:quadkey": "031311102133", "view:azimuth": 267.8986428571429, "instruments": ["VNIR"], "tile:zone": 11, "wkt": "POLYGON ((-118.3017475431261 34.15402881455286, -118.3559739409897 34.15344170891068, -118.3566953452093 34.19852234246022, -118.3024401181474 34.19911043716477, -118.3017475431261 34.15402881455286))", "tile:no_data_percentage": 0.0, "aoi:data_area_sqkm": 2, "aoi:data_percentage": 100, "aoi:cloud_free_percentage": 100}, {"off_nadir_min": 27.239704, "view:sun_azimuth": 115.5013325, "acquisition_id": "103001009764E100", "pan_resolution_max": 0.5817283, "date": "2019-07-06", "datetime": "2019-07-06T18:33:22.056421Z", "constellation": "digitalglobe", "tile:cloud_free_percentage": 100.0, "id": "103001009764E100", "pan_resolution_avg": 0.5774806825, "pan_resolution_min": 0.5758816, "modified": "2021-01-18T20:36:58Z", "view:sun_elevation": 68.266473625, "tile:cloud_percentage": 0.0, "multi_resolution_avg": 2.303917225, "multi_resolution_min": 2.29723, "view:off_nadir": 27.4087735, "tile:data_percentage": 100.0, "off_nadir_max": 27.853977, "tile:cloud_polys": null, "platform": "worldview-02", "multi_resolution_max": 2.32129, "eo:cloud_cover": 51.09531980605002, "tile:quadkey": "031311102133", "view:azimuth": 273.17260375, "instruments": ["VNIR"], "tile:zone": 11, "wkt": "POLYGON ((-118.3017475431261 34.15402881455286, -118.3559739409897 34.15344170891068, -118.3566953452093 34.19852234246022, -118.3024401181474 34.19911043716477, -118.3017475431261 34.15402881455286))", "tile:no_data_percentage": 0.0, "aoi:data_area_sqkm": 2, "aoi:data_percentage": 100, "aoi:cloud_free_percentage": 100}, {"off_nadir_min": 10.271306, "view:sun_azimuth": 130.93073857142858, "acquisition_id": "1050010016379A00", "pan_resolution_max": 0.4439251, "date": "2019-05-12", "datetime": "2019-05-12T18:39:56.284976Z", "constellation": "digitalglobe", "tile:cloud_free_percentage": 100.0, "id": "1050010016379A00", "pan_resolution_avg": 0.42950473, "pan_resolution_min": 0.42327142, "modified": "2021-01-18T20:57:32Z", "view:sun_elevation": 67.976663, "tile:cloud_percentage": 0.0, "multi_resolution_avg": 1.7183228142857143, "multi_resolution_min": 1.6933947, "view:off_nadir": 12.373073142857143, "tile:data_percentage": 100.0, "off_nadir_max": 16.646788, "tile:cloud_polys": null, "platform": "geoeye-01", "multi_resolution_max": 1.7759998, "eo:cloud_cover": 20.87471325943325, "tile:quadkey": "031311102133", "view:azimuth": 300.90860428571426, "instruments": ["VNIR"], "tile:zone": 11, "wkt": "POLYGON ((-118.3017475431261 34.15402881455286, -118.3559739409897 34.15344170891068, -118.3566953452093 34.19852234246022, -118.3024401181474 34.19911043716477, -118.3017475431261 34.15402881455286))", "tile:no_data_percentage": 0.0, "aoi:data_area_sqkm": 2, "aoi:data_percentage": 100, "aoi:cloud_free_percentage": 100}, {"off_nadir_min": 39.64042, "view:sun_azimuth": 165.58419, "acquisition_id": "105001001937AC00", "pan_resolution_max": 0.73523647, "date": "2019-10-13", "datetime": "2019-10-13T18:59:37.085680Z", "constellation": "digitalglobe", "tile:cloud_free_percentage": 100.0, "id": "105001001937AC00", "pan_resolution_avg": 0.706194842, "pan_resolution_min": 0.673812, "modified": "2021-01-18T20:42:33Z", "view:sun_elevation": 46.9570796, "tile:cloud_percentage": 0.0, "multi_resolution_avg": 2.82678612, "multi_resolution_min": 2.697249, "view:off_nadir": 41.0337986, "tile:data_percentage": 100.0, "off_nadir_max": 42.213158, "tile:cloud_polys": null, "platform": "geoeye-01", "multi_resolution_max": 2.9429595, "eo:cloud_cover": 0.007957205922402672, "tile:quadkey": "031311102133", "view:azimuth": 42.1069052, "instruments": ["VNIR"], "tile:zone": 11, "wkt": "POLYGON ((-118.3017475431261 34.15402881455286, -118.3559739409897 34.15344170891068, -118.3566953452093 34.19852234246022, -118.3024401181474 34.19911043716477, -118.3017475431261 34.15402881455286))", "tile:no_data_percentage": 0.0, "aoi:data_area_sqkm": 2, "aoi:data_percentage": 100, "aoi:cloud_free_percentage": 100}, {"off_nadir_min": 22.45756, "view:sun_azimuth": 157.35216, "acquisition_id": "1040010047412A00", "pan_resolution_max": 0.3540759, "date": "2019-02-24", "datetime": "2019-02-24T19:01:01.054891Z", "constellation": "digitalglobe", "tile:cloud_free_percentage": 100.0, "id": "1040010047412A00", "pan_resolution_avg": 0.3538362, "pan_resolution_min": 0.35369173, "modified": "2021-01-18T20:30:24Z", "view:sun_elevation": 44.054592, "tile:cloud_percentage": 0.0, "multi_resolution_avg": 1.4164989, "multi_resolution_min": 1.4160151, "view:off_nadir": 22.47252, "tile:data_percentage": 69.0, "off_nadir_max": 22.498053, "tile:cloud_polys": null, "platform": "worldview-03", "multi_resolution_max": 1.4171804, "eo:cloud_cover": 0.0, "tile:quadkey": "031311102133", "view:azimuth": 201.61456, "instruments": ["VNIR"], "tile:zone": 11, "wkt": "POLYGON ((-118.3394417494181 34.19871196405828, -118.3024401181474 34.19911043716477, -118.3017475431261 34.15402881455286, -118.3393621614862 34.15362410945004, -118.339459 34.16711800000001, -118.3394417494181 34.19871196405828))", "tile:no_data_percentage": 31.0, "aoi:data_area_sqkm": 2, "aoi:data_percentage": 100, "aoi:cloud_free_percentage": 100}, {"off_nadir_min": 51.12408, "view:sun_azimuth": 176.97669125, "acquisition_id": "1040010054BAB200", "pan_resolution_max": 0.7962694, "date": "2019-10-29", "datetime": "2019-10-29T19:27:41.872586Z", "constellation": "digitalglobe", "tile:cloud_free_percentage": 100.0, "id": "1040010054BAB200", "pan_resolution_avg": 0.79476747875, "pan_resolution_min": 0.7935579, "modified": "2021-05-17T22:44:48Z", "view:sun_elevation": 42.48456875, "tile:cloud_percentage": 0.0, "multi_resolution_avg": 3.176507925, "multi_resolution_min": 3.1717932, "view:off_nadir": 51.129795625, "tile:data_percentage": 100.0, "off_nadir_max": 51.141743, "tile:cloud_polys": null, "platform": "worldview-03", "multi_resolution_max": 3.1823854, "eo:cloud_cover": 1.2894729225158468, "tile:quadkey": "031311102133", "view:azimuth": 61.54774675, "instruments": ["VNIR"], "tile:zone": 11, "wkt": "POLYGON ((-118.3017475431261 34.15402881455286, -118.3559739409897 34.15344170891068, -118.3566953452093 34.19852234246022, -118.3024401181474 34.19911043716477, -118.3017475431261 34.15402881455286))", "tile:no_data_percentage": 0.0, "aoi:data_area_sqkm": 2, "aoi:data_percentage": 100, "aoi:cloud_free_percentage": 100}, {"off_nadir_min": 53.835075, "view:sun_azimuth": 176.79184333333333, "acquisition_id": "104001005305AF00", "pan_resolution_max": 0.9641716, "date": "2019-10-29", "datetime": "2019-10-29T19:28:08.968512Z", "constellation": "digitalglobe", "tile:cloud_free_percentage": 100.0, "id": "104001005305AF00", "pan_resolution_avg": 0.9533491788888889, "pan_resolution_min": 0.943364, "modified": "2021-01-18T19:59:28Z", "view:sun_elevation": 42.479863333333334, "tile:cloud_percentage": 0.0, "multi_resolution_avg": 3.8080294222222224, "multi_resolution_min": 3.76841, "view:off_nadir": 53.96496177777778, "tile:data_percentage": 100.0, "off_nadir_max": 54.10407, "tile:cloud_polys": null, "platform": "worldview-03", "multi_resolution_max": 3.8509982, "eo:cloud_cover": 0.003280939916698968, "tile:quadkey": "031311102133", "view:azimuth": 52.216419555555554, "instruments": ["VNIR"], "tile:zone": 11, "wkt": "POLYGON ((-118.3017475431261 34.15402881455286, -118.3559739409897 34.15344170891068, -118.3566953452093 34.19852234246022, -118.3024401181474 34.19911043716477, -118.3017475431261 34.15402881455286))", "tile:no_data_percentage": 0.0, "aoi:data_area_sqkm": 2, "aoi:data_percentage": 100, "aoi:cloud_free_percentage": 100}, {"off_nadir_min": 12.468467, "view:sun_azimuth": 161.51538, "acquisition_id": "1040010048A0AD00", "pan_resolution_max": 0.32495567, "date": "2019-02-12", "datetime": "2019-02-12T19:10:12.317415Z", "constellation": "digitalglobe", "tile:cloud_free_percentage": 100.0, "id": "1040010048A0AD00", "pan_resolution_avg": 0.32313636, "pan_resolution_min": 0.3210616, "modified": "2021-01-18T20:31:53Z", "view:sun_elevation": 40.638664, "tile:cloud_percentage": 0.0, "multi_resolution_avg": 1.2930026, "multi_resolution_min": 1.2860322, "view:off_nadir": 13.240453, "tile:data_percentage": 100.0, "off_nadir_max": 14.0052, "tile:cloud_polys": "POLYGON ((-118.311979 34.175363, -118.310836 34.175105, -118.310177 34.174571, -118.310483 34.17335, -118.311944 34.173064, -118.312603 34.173598, -118.312784 34.174814, -118.311979 34.175363))", "platform": "worldview-03", "multi_resolution_max": 1.3000507, "eo:cloud_cover": 0.0, "tile:quadkey": "031311102133", "view:azimuth": 104.95552, "instruments": ["VNIR"], "tile:zone": 11, "wkt": "POLYGON ((-118.3017475431261 34.15402881455286, -118.3559739409897 34.15344170891068, -118.3566953452093 34.19852234246022, -118.3024401181474 34.19911043716477, -118.3017475431261 34.15402881455286))", "tile:no_data_percentage": 0.0, "aoi:data_area_sqkm": 2, "aoi:data_percentage": 100, "aoi:cloud_free_percentage": 100}, {"off_nadir_min": 28.041332, "view:sun_azimuth": 169.31262, "acquisition_id": "103001009E954700", "pan_resolution_max": 0.58731097, "date": "2019-11-18", "datetime": "2019-11-18T19:02:17.421893Z", "constellation": "digitalglobe", "tile:cloud_free_percentage": 100.0, "id": "103001009E954700", "pan_resolution_avg": 0.5853026275, "pan_resolution_min": 0.58380795, "modified": "2021-01-18T20:02:40Z", "view:sun_elevation": 36.18130825, "tile:cloud_percentage": 0.0, "multi_resolution_avg": 2.34188095, "multi_resolution_min": 2.3360882, "view:off_nadir": 28.1584915, "tile:data_percentage": 100.0, "off_nadir_max": 28.320816, "tile:cloud_polys": null, "platform": "worldview-02", "multi_resolution_max": 2.3497088, "eo:cloud_cover": 0.0, "tile:quadkey": "031311102133", "view:azimuth": 58.767653625, "instruments": ["VNIR"], "tile:zone": 11, "wkt": "POLYGON ((-118.3017475431261 34.15402881455286, -118.3559739409897 34.15344170891068, -118.3566953452093 34.19852234246022, -118.3024401181474 34.19911043716477, -118.3017475431261 34.15402881455286))", "tile:no_data_percentage": 0.0, "aoi:data_area_sqkm": 2, "aoi:data_percentage": 100, "aoi:cloud_free_percentage": 100}, {"off_nadir_min": 24.68829, "view:sun_azimuth": 166.7305625, "acquisition_id": "105001001A4CB700", "pan_resolution_max": 0.5188968, "date": "2019-12-15", "datetime": "2019-12-15T18:58:49.485351Z", "constellation": "digitalglobe", "tile:cloud_free_percentage": 100.0, "id": "105001001A4CB700", "pan_resolution_avg": 0.50127025, "pan_resolution_min": 0.49013853, "modified": "2021-05-17T22:11:26Z", "view:sun_elevation": 31.6657915, "tile:cloud_percentage": 0.0, "multi_resolution_avg": 2.0067677125, "multi_resolution_min": 1.9624093, "view:off_nadir": 26.06875375, "tile:data_percentage": 78.0, "off_nadir_max": 28.134678, "tile:cloud_polys": null, "platform": "geoeye-01", "multi_resolution_max": 2.077161, "eo:cloud_cover": 0.06799757827500061, "tile:quadkey": "031311102133", "view:azimuth": 79.791589375, "instruments": ["VNIR"], "tile:zone": 11, "wkt": "POLYGON ((-118.344849117304 34.19865279680909, -118.3024401181474 34.19911043716477, -118.3017475431261 34.15402881455286, -118.3442335649552 34.15357085352837, -118.344206 34.16094500000001, -118.344849117304 34.19865279680909))", "tile:no_data_percentage": 22.0, "aoi:data_area_sqkm": 2, "aoi:data_percentage": 100, "aoi:cloud_free_percentage": 100}]}}]}
+        const criteria = {"aoi:cloud_free_percentage": {"gte": 95}, "aoi:data_percentage": {"gte": 75}, "view:sun_elevation": {"gte": 5}, "platform": {"in": ["geoeye-01", "worldview-02", "worldview-03", "worldview-04"]}, "instruments": {"not-contains": "SWIR"}, "datetime": {"between": ["2019-01-01T00:00:00Z", "2020-01-01T00:00:00Z"]}, "aoi": "POLYGON ((-118.3225151775104 34.18749949999999, -118.3225151775104 34.1974995, -118.3346048224896 34.1974995, -118.3346048224896 34.18749949999999, -118.3225151775104 34.18749949999999))"}
+        const usage = {"limit_sqkm": -1, "available_sqkm": -1, "annual_subscription_fee_limit": -1, "total_imagery_balance": -1, "fresh_imagery_fee_limit": -1, "fresh_imagery_balance": -1, "standard_imagery_fee_limit": -1, "standard_imagery_balance": -1, "training_imagery_fee_limit": -1, "training_imagery_balance": -1, "usage_as_of": "2021-08-04T21:32:24Z", "standard_imagery_sqkm": 26, "selection_sqkm": 26, "fresh_imagery_sqkm": 0, "training_imagery_sqkm": 0}
+        const request_id = "5716080912532097252"
+        const requested_stack_depth = 20
+
+        console.log("criteria")
+        console.log(criteria)
+
+        const minMax = findMinMax(geojson)
+        const intervals = minMaxIntervals(minMax[0], minMax[1])
+
+        const usageEl = document.getElementById("progress-container")
+        const legendEl = document.getElementById("legend-container")
+        const requestEl = document.getElementById("request-summary-container")
+
+        createLegend(legendEl, requested_stack_depth)
+        createRequestSummary(requestEl, criteria, request_id, requested_stack_depth, usage)
+
+        if ( criteria && criteria.aoi ) {
+          const aoi = normalizeAoi(criteria.aoi)
+          console.log("aoi:")
+          console.log(aoi)
+          // add source
+          map.addSource("selection-aoi", { type: "geojson", data: aoi })
+          // add aoi styling
+          map.addLayer({
+            id: "aoi",
+            type: "line",
+            source: "selection-aoi",
+            paint: {
+              "line-color": "#17a2b8",
+              "line-width": 5
+            }
+
+          })
+
+          // fit map to bounds of AOI if there is one.
+          try {
+            var coords = [];
+            if (aoi.features) {
+              aoi.features.forEach(function(feature) {
+                  coords = getCoordinates(feature.geometry.coordinates);
+              });
+            }
+            else {
+                coords = getCoordinates(aoi.coordinates);
+            }
+            console.log(coords);
+  
+            var bounds = coords.reduce(function (bounds, coord) {
+              return bounds.extend(coord);
+            }, new mapboxgl.LngLatBounds(coords[0], coords[0]));
+
+            // if aoi is too small, we want to fix our bounds so that we don't zoom in too close
+            // the map shouldn't automatically zoom in closer than one ARD tile
+
+            const lat_diff = bounds._ne.lat - bounds._sw.lat 
+            const long_diff = bounds._ne.long - bounds._sw.long
+
+            if(lat_diff < 0.075){
+                const extra_lat = 0.075 - lat_diff
+                const half_extra_lat = extra_lat * 0.5
+                bounds._ne.lat += half_extra_lat
+                bounds._sw.lat -= half_extra_lat
+            }
+
+            if(long_diff < 0.075){
+                const extra_long = 0.075 - long_diff
+                const half_extra_long = extra_long * 0.5
+                bounds._ne.long += half_extra_long
+                bounds._sw.long -= half_extra_long
+            }
+  
+            map.fitBounds(bounds, {padding: 50});
+          } catch(error){
+            console.log("something went wrong while fitting bounds to AOI:")
+            console.log(error)
+          }
+
+        }
+
+        map.addSource("material-selection-source", { type: "geojson", data: geojson })
+        map.addLayer({
+          id: "active-layer",
+          type: "fill",
+          source: "material-selection-source",
+          paint: {
+            "fill-outline-color": "#fff",
+            "fill-color": [
+              "case",
+              ["==", 0, ["get", "available_tiles"]],
+              "rgba(166, 166, 166, .30)",
+              ["==", true, ["get", "stack_depth_fulfilled"]],
+              [
+                "step",
+                ["get", "available_tiles"],
+                "rgba(255, 194, 10, .10)",
+                intervals[0],
+                "rgba(255, 194, 10, .20)",
+                intervals[1],
+                "rgba(255, 194, 10, .40)",
+                intervals[2],
+                "rgba(255, 194, 10, .60)",
+                intervals[3],
+                "rgba(255, 194, 10, .80)",
+              ],
+              ["==", false, ["get", "stack_depth_fulfilled"]],
+              [
+                "step",
+                ["-", intervals[3], ["get", "available_tiles"]],
+                "rgba(12, 123, 220, .10)",
+                intervals[0],
+                "rgba(12, 123, 220, .20)",
+                intervals[1],
+                "rgba(12, 123, 220, .30)",
+                intervals[2],
+                "rgba(12, 123, 220, .40)",
+                intervals[3],
+                "rgba(12, 123, 220, .50)",
+              ],
+              "rgba(166, 166, 166, .30)",
+            ],
+          },
+        });
+
+          // ADD HOVER SHOW BOUNDS OF ACQ_ID
+          // When the user moves their mouse over the cell grid we will show how much of it is covered by the acquisition
+
+          var hoveredId = null
+          var oldHoveredId = null
+
+          function mergeBestMatches(bestMatches) {
+
+            if(bestMatches.length != 0){
+              var totalCoverage = bestMatches.reduce((acc, cur) => {
+                acc.merge(new Wkt.Wkt(cur.wkt))
+                return acc
+              }, wkt.read(bestMatches[0].wkt))
+              return totalCoverage.toJson()
+            }
+
+            // return a bogus geojson object if there are no matches
+            // this will eliminate annoying console errors
+            return {
+              "type": "Feature",
+              "geometry": {
+                "type": "Point",
+                "coordinates": [0, 0]
+              },
+              "properties": {
+                "fake property": "fake value"
+              }
+            }
+
+          }
+
+          map.on('mousemove', 'active-layer', function (e) {
+
+            oldHoveredId = hoveredId
+            hoveredId = e.features[0].properties.cell_id;
+
+            if ( hoveredId === oldHoveredId ) {
+              return;
+            }
+
+            if (e.features.length > 0) {
+                if ( map.getLayer(oldHoveredId) ) {
+                  map.removeLayer(oldHoveredId)
+                }
+                if ( map.getSource(oldHoveredId + "-source") ) {
+                  map.removeSource(oldHoveredId + "-source")
+                }
+
+                if (hoveredId) {
+                  
+                  if ( !map.getSource(`${hoveredId}-source`) && !map.getLayer(hoveredId)) {
+                    try {
+
+                      map.addSource(`${hoveredId}-source`, {
+                        type: "geojson",
+                        data: mergeBestMatches(JSON.parse(e.features[0].properties.best_matches))
+                      });
+                      
+                      const calc_opacity = (num) => num === 0 ? 0 : 1 / (2 * num)
+                      
+                      map.addLayer({
+                        id: hoveredId,
+                        source: `${hoveredId}-source`,
+                        type: "fill",
+                        paint: {
+                          "fill-outline-color": "rgba(169,169,169, .33)",
+                          "fill-color": `rgba(169,169,169, ${calc_opacity(intervals[3])})`
+                        }
+                      });
+
+                    } catch(error) {
+                      console.warn(error)
+                    }
+                }
+              }
+            }
+          });
+
+          // When the mouse leaves the state-fill layer, update the feature state of the
+          // previously hovered feature.
+          map.on('mouseleave', 'active-layer', function () {
+            if ( map.getLayer(hoveredId) ) {
+              map.removeLayer(hoveredId)
+            }
+            if ( map.getSource(hoveredId + "-source") ) {
+              map.removeSource(hoveredId + "-source")
+            }
+
+            hoveredId = null;
+          });
+
+          map.on("click", "active-layer", (event) => {
+            // highlight bounds of clicked cell
+            event.features.forEach(feature => {
+              if (feature.properties.cell_id){
+      
+                const cell_feature = geojson.features.find(el => {
+                  return el.properties.cell_id === feature.properties.cell_id
+                });
+
+                if ( map.getSource('cell-extent') ) {
+                  map.getSource('cell-extent').setData(cell_feature.geometry)
+                } else {
+                  map.addSource('cell-extent', {type: 'geojson', data: cell_feature.geometry})
+                  map.addLayer({
+                    id: 'hightlight-cell-bounds',
+                    type: 'line',
+                    source: 'cell-extent',
+                    layout: {},
+                    paint:{
+                      "line-width": 5,
+                      "line-color": "red"
+                    } 
+                  })
+                }
+              }
+            })
+
+          const description = Object.entries(
+            event.features[0].properties
+          ).reduce((accumulator, featureProperty) => {
+            if (featureProperty[0] === "best_matches") {
+              const acqs = JSON.parse(featureProperty[1]);
+              var element = document.getElementById("sidebar");
+              element.classList.add("active");
+              element.classList.remove("inactive");
+              if (acqs.length > 0) {
+                  // getting zone/quadkey from the first element in the matches array
+                  var cell_zone = acqs[0]['tile:zone'].toString().padStart(2, '0');
+                  createSidebarContent(element, acqs, `Z${cell_zone}-${acqs[0]['tile:quadkey']}`)
+              }
+              else {
+                  createSidebarContent(element, [], '');
+              }
+              return accumulator;
+            }
+            return accumulator.concat(
+              `<div><strong>${featureProperty[0]}:</strong> ${featureProperty[1]}</div>`
+            );
+          }, "");
+
+          // show the tooltip exactly where you clicked
+          new mapboxgl.Popup()
+            .setLngLat([event.lngLat.lng, event.lngLat.lat])
+            .setHTML(
+              `<div id="mapbox-view-tooltip-wrapper">${description}</div>`
+            )
+            .addTo(map);
+
+        });
+      });
+
+    function toggleSidebar() {
+        var classes = document.getElementById("sidebar").classList;
+        if (classes.contains("active")) {
+            document.getElementById("sidebar").classList.remove("active");
+            document.getElementById("sidebar").classList.add("inactive");
+            document.getElementById("sidebar-content").classList.add("hidden")
+            document.getElementById("closebtn").innerText = "|>";
+        } else {
+            document.getElementById("sidebar").classList.remove("inactive");
+            document.getElementById("sidebar").classList.add("active");
+            document.getElementById("sidebar-content").classList.remove("hidden")
+            document.getElementById("closebtn").innerText = "<|";
+        }
+    }
+      // On hover show bounds of acq_id?
+      // https://docs.mapbox.com/mapbox-gl-js/example/hover-styles
+    </script>
+  </body>
+</html>
