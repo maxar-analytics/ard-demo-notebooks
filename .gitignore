@@ -1,2 +1,5 @@
 .DS_Store
 chips/*
+outputs/*
+assets/.DS_Store
+.ipynb_checkpoints/*
