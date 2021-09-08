@@ -10,7 +10,7 @@ To run locally, install dependencies from `requirements.txt`:
 $ pip install -r requirements.txt
 ```
 
-Then install `vizard`:
+Then install [`vizard`](https://github.com/maxar-analytics/vizard):
 
 ```bash
 $ pip install git+ssh://git@github.com/maxar-analytics/vizard --extra-index-url https://packages.ard.maxar.com
