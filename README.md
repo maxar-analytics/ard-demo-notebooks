@@ -12,15 +12,6 @@ $ pip install -r requirements.txt
 
 Then install `vizard`:
 
-1. Clone the repo
-
 ```bash
-$ git clone https://github.com/maxar-analytics/vizard.git
-```
-
-2. Install to your Python environment
-
-Navigate into your new clone of the repo and run:
+$ pip install git+ssh://git@github.com/maxar-analytics/vizard --extra-index-url https://packages.ard.maxar.com
 ```bash
-$ python setup.py install
-```
