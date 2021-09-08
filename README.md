@@ -2,9 +2,15 @@
 
 Demo ARD notebooks for running locally in Jupyter or converting to a Docker image
 
-### Installing dependencies
+### Cloning and installing dependencies
 
-To run locally, install dependencies from `requirements.txt`:
+To run locally, clone this repo:
+
+```bash
+$ git clone https://github.com/maxar-analytics/ard-demo-notebooks.git
+```
+
+Navigate into your local clone and install dependencies from `requirements.txt`:
 
 ```bash
 $ pip install -r requirements.txt
