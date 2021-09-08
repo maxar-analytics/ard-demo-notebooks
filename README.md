@@ -14,4 +14,4 @@ Then install `vizard`:
 
 ```bash
 $ pip install git+ssh://git@github.com/maxar-analytics/vizard --extra-index-url https://packages.ard.maxar.com
-```bash
+```
